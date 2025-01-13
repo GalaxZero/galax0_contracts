@@ -36,7 +36,7 @@ pub struct CreditScore {
     pub data_completeness: u8, // 1-100
 }
 
-#[derive(Copy, Drop, Serde)]
+#[derive(Copy, Drop, Serde, starknet::Store)]
 pub struct ScoreFactors {
     pub wallet_weight: u8,      // Base wallet activity
     pub defi_weight: u8,        // DeFi participation
@@ -62,7 +62,7 @@ pub struct ScoringPermission {
 }
 
 // Constants
-mod Constants {
+pub mod Constants {
     pub const MIN_SCORE: u256 = 300;
     pub const MAX_SCORE: u256 = 850;
     
