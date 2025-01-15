@@ -4,7 +4,7 @@ use crate::data_structures::{
     ScoreFactors, ScoringPermission
 };
 use crate::data_provider::{IDataProviderDispatcher, IDataProviderDispatcherTrait};
-use crate::scoring_engine::{IScoringEngine, IScoringEngineDispatcher, IScoringEngineDispatcherTrait};
+use crate::scoring_engine::{IScoringEngineDispatcher, IScoringEngineDispatcherTrait};
 
 #[starknet::interface]
 trait ICreditScoreMain<TContractState> {
@@ -32,8 +32,8 @@ trait ICreditScoreMain<TContractState> {
 
 #[starknet::contract]
 mod CreditScoreMain {
-    use starknet::storage::StoragePointerReadAccess;
-use starknet::storage::{StoragePointerWriteAccess, Map};
+use starknet::storage::{StoragePointerWriteAccess, StorageMapWriteAccess, StorageMapReadAccess, StoragePointerReadAccess, Map};
+
 use super::*;
      // use super::Constants; // Commented out as Constants module is not defined
     mod Errors {
@@ -175,14 +175,14 @@ use super::*;
             // Calculate new score
             let scoring_engine = self.scoring_engine.read();
             let scoring_engine_dispatcher = IScoringEngineDispatcher { contract_address: scoring_engine };
-            let new_score = scoring_engine_dispatcher.calculate_credit_score(
+            let new_score: CreditScore = scoring_engine_dispatcher.calculate_credit_score(
                 wallet_data,
                 defi_data,
                 exchange_data
             );
             
             // Update storage
-            self.user_scores.write(caller, new_score.score);
+            self.user_scores.write(caller, new_score);
             
             self.emit(Event::DataSubmitted(
                 DataSubmitted {
@@ -236,7 +236,8 @@ use super::*;
                 expiry: get_block_timestamp() + 2592000,   // 30 days default
             };
             
-            self.score_permissions.write((caller, to), permission);
+            self.score_permissions.write((caller, to), _permission);
+
             
             self.emit(Event::AccessGranted(
                 AccessGranted {
@@ -256,7 +257,7 @@ use super::*;
                 permission_type: 0,
                 expiry: 0
             };
-            self.score_permissions.write((caller, from), permission);
+            self.score_permissions.write((caller, from), _permission);
             
             self.emit(Event::AccessRevoked(
                 AccessRevoked {
@@ -303,8 +304,9 @@ use super::*;
 
         fn set_scoring_parameters(ref self: ContractState, new_weights: ScoreFactors) {
             self._only_admin();
-            let mut scoring_engine = self.scoring_engine.read();
-            scoring_engine.update_score_weights(new_weights);
+            let scoring_engine_address = self.scoring_engine.read();
+            let scoring_engine_dispatcher = IScoringEngineDispatcher { contract_address: scoring_engine_address };
+            scoring_engine_dispatcher.update_score_weights(new_weights);
         }
 
         fn pause(ref self: ContractState) {

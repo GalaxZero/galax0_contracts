@@ -53,7 +53,7 @@ pub struct VerificationData {
 }
 
 // Access control for score sharing
-#[derive(Copy, Drop, Serde)]
+#[derive(Copy, Drop, Serde, starknet::Store )]
 pub struct ScoringPermission {
     pub granted_to: ContractAddress,
     pub granted_by: ContractAddress,
