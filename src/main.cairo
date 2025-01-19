@@ -7,7 +7,7 @@ use crate::data_provider::{IDataProviderDispatcher, IDataProviderDispatcherTrait
 use crate::scoring_engine::{IScoringEngineDispatcher, IScoringEngineDispatcherTrait};
 
 #[starknet::interface]
-trait ICreditScoreMain<TContractState> {
+pub trait ICreditScoreMain<TContractState> {
     // User functions
     fn submit_data(
         ref self: TContractState,
@@ -31,7 +31,7 @@ trait ICreditScoreMain<TContractState> {
 }
 
 #[starknet::contract]
-mod CreditScoreMain {
+pub mod CreditScoreMain {
 use starknet::storage::{StoragePointerWriteAccess, StorageMapWriteAccess, StorageMapReadAccess, StoragePointerReadAccess, Map};
 
 use super::*;
